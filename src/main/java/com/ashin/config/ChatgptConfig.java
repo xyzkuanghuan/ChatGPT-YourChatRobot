@@ -9,12 +9,12 @@ import java.util.List;
 /**
  * chatgpt配置
  *
- * @author ashinnotfound
- * @date 2023/03/04
+ * @author kuanghuan
  */
 @Data
 @Component
 @ConfigurationProperties("chatgpt")
 public class ChatgptConfig {
+
     private List<String> apiKey;
 }

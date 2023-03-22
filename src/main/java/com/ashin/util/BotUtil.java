@@ -8,16 +8,20 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * chatbot工具类
  *
- * @author ashinnotfound
- * @date 2023/2/1
+ * @author kuanghuan
  */
 @Component
 public class BotUtil {
+
     @Resource
     public void setAccountConfig(BotConfig botConfig) {
         BotUtil.botConfig = botConfig;
@@ -25,8 +29,10 @@ public class BotUtil {
 
     private static BotConfig botConfig;
 
-    private static final Map<String, List<ChatMessage>> PROMPT_MAP = new HashMap<>();
-    private static final Map<OpenAiService, Integer> COUNT_FOR_OPEN_AI_SERVICE = new HashMap<>();
+    private static final Map<String, List<ChatMessage>> PROMPT_MAP = new ConcurrentHashMap<>();
+
+    private static final Map<OpenAiService, Integer> COUNT_FOR_OPEN_AI_SERVICE = new ConcurrentHashMap<>();
+
     private static ChatCompletionRequest.ChatCompletionRequestBuilder completionRequestBuilder;
 
     @PostConstruct
@@ -56,13 +62,6 @@ public class BotUtil {
     }
 
     public static List<ChatMessage> getPrompt(String sessionId, String newPrompt) {
-        if (!PROMPT_MAP.containsKey(sessionId)) {
-            if (null != botConfig.getBasicPrompt()){
-                List<ChatMessage> promptList = new ArrayList<>();
-                promptList.add(botConfig.getBasicPrompt());
-                PROMPT_MAP.put(sessionId, promptList);
-            }
-        }
         List<ChatMessage> promptList = PROMPT_MAP.getOrDefault(sessionId, new ArrayList<>());
         promptList.add(new ChatMessage("user", newPrompt));
         return promptList;
@@ -75,4 +74,5 @@ public class BotUtil {
     public static void resetPrompt(String sessionId) {
         PROMPT_MAP.remove(sessionId);
     }
+
 }

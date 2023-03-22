@@ -7,14 +7,17 @@ import org.springframework.stereotype.Component;
 /**
  * qq配置
  *
- * @author ashinnotfound
- * @date 2023/03/04
+ * @author kuanghuan
  */
 @Data
 @Component
 @ConfigurationProperties("qq")
 public class QqConfig {
+
     private Boolean enable;
+
     private Long account;
+
     private String password;
+
 }

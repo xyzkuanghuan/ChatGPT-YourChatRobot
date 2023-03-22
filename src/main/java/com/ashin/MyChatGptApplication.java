@@ -3,6 +3,9 @@ package com.ashin;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+/**
+ * @author kuanghuan
+ */
 @SpringBootApplication
 public class MyChatGptApplication {
 

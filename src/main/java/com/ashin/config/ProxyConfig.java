@@ -7,13 +7,15 @@ import org.springframework.stereotype.Component;
 /**
  * 代理配置
  *
- * @author ashinnotfound
- * @date 2023/03/04
+ * @author kuanghuan
  */
 @Data
 @Component
 @ConfigurationProperties("proxy")
 public class ProxyConfig {
+
     private String host;
+
     private String port;
+
 }

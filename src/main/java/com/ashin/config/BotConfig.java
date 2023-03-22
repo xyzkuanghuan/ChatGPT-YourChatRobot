@@ -1,10 +1,9 @@
 package com.ashin.config;
 
+import cn.zhouyafeng.itchat4j.Wechat;
 import com.ashin.handler.QqMessageHandler;
 import com.ashin.handler.WechatMessageHandler;
-import com.theokanning.openai.completion.chat.ChatMessage;
 import com.theokanning.openai.service.OpenAiService;
-import cn.zhouyafeng.itchat4j.Wechat;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.mamoe.mirai.Bot;
@@ -22,23 +21,27 @@ import java.util.List;
 /**
  * bot配置
  *
- * @author ashinnotfound
- * @date 2023/02/13
+ * @author kuanghuan
  */
 @Slf4j
 @Data
 @Component
 public class BotConfig {
+
     @Resource
     ProxyConfig proxyConfig;
+
     @Resource
     QqConfig qqConfig;
+
     @Resource
     WechatConfig wechatConfig;
+
     @Resource
     ChatgptConfig chatgptConfig;
 
     private Bot qqBot;
+
     @Resource
     private QqMessageHandler qqMessageHandler;
 
@@ -46,9 +49,11 @@ public class BotConfig {
     private WechatMessageHandler wechatMessageHandler;
 
     private List<OpenAiService> openAiServiceList;
-    private ChatMessage basicPrompt;
+
     private Integer maxToken;
+
     private Double temperature;
+
     private String model;
 
     @PostConstruct
@@ -63,13 +68,9 @@ public class BotConfig {
             System.setProperty("https.proxyPort", proxyConfig.getPort());
         }
 
-        //ChatGPT
         model = "gpt-3.5-turbo";
-//        model = "gpt-3.5-turbo-0301" 这是快照版本
         maxToken = 2048;
         temperature = 0.8;
-//        你可以通过设定basicPrompt来指定人格
-//        basicPrompt = new ChatMessage("system", "You are a helpful assistant");
         openAiServiceList = new ArrayList<>();
         for (String apiKey : chatgptConfig.getApiKey()) {
             apiKey = apiKey.trim();
@@ -80,10 +81,9 @@ public class BotConfig {
         }
 
         //qq
-        if (qqConfig.getEnable()){
+        if (qqConfig.getEnable()) {
             Long qq = qqConfig.getAccount();
             String password = qqConfig.getPassword();
-            //登录 登陆协议有ANDROID_PHONE, ANDROID_PAD, ANDROID_WATCH, IPAD, MACOS 其中MACOS较为稳定
             BotConfiguration.MiraiProtocol protocol = BotConfiguration.MiraiProtocol.MACOS;
             try {
                 log.info("正在登录qq,请按提示操作：");
@@ -104,7 +104,7 @@ public class BotConfig {
         }
 
         //微信
-        if (wechatConfig.getEnable()){
+        if (wechatConfig.getEnable()) {
             log.info("正在登录微信,请按提示操作：");
             Wechat wechatBot = new Wechat(wechatMessageHandler, wechatConfig.getQrPath());
             wechatBot.start();

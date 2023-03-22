@@ -7,13 +7,15 @@ import org.springframework.stereotype.Component;
 /**
  * 微信配置
  *
- * @author ashinnotfound
- * @date 2023/03/19
+ * @author kuanghuan
  */
 @Data
 @Component
 @ConfigurationProperties("wechat")
 public class WechatConfig {
+
     private Boolean enable;
+
     private String qrPath;
+
 }

@@ -1,12 +1,15 @@
 package com.ashin.handler;
 
+import cn.zhouyafeng.itchat4j.beans.BaseMsg;
+import cn.zhouyafeng.itchat4j.core.Core;
+import cn.zhouyafeng.itchat4j.face.IMsgHandlerFace;
+import com.alibaba.fastjson.JSON;
+import com.ashin.constants.ChatConstants;
 import com.ashin.entity.bo.ChatBO;
 import com.ashin.exception.ChatException;
 import com.ashin.service.InteractService;
 import com.ashin.util.BotUtil;
-import cn.zhouyafeng.itchat4j.beans.BaseMsg;
-import cn.zhouyafeng.itchat4j.core.Core;
-import cn.zhouyafeng.itchat4j.face.IMsgHandlerFace;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -14,59 +17,41 @@ import javax.annotation.Resource;
 /**
  * 微信消息处理程序
  *
- * @author ashinnotfound
- * @date 2023/03/19
+ * @author kuanghuan
  */
 @Component
+@Slf4j
 public class WechatMessageHandler implements IMsgHandlerFace {
 
     @Resource
     private InteractService interactService;
 
-    private static final String RESET_WORD = "重置会话";
-
     @Override
     public String textMsgHandle(BaseMsg baseMsg) {
-        ChatBO chatBO = new ChatBO();
-        //如果是在群聊
-        if (baseMsg.isGroupMsg()){
-            //存在@机器人的消息就向ChatGPT提问
-            if (baseMsg.getText().contains("@"+ Core.getInstance().getNickName())){
-                //去除@再提问
-                String prompt = baseMsg.getText().replace("@"+ Core.getInstance().getNickName(), "").trim();
-                if (RESET_WORD.equals(prompt)){
-                    BotUtil.resetPrompt(baseMsg.getFromUserName());
-                    return "重置会话成功";
-                }else {
-                    chatBO.setPrompt(prompt);
-                    chatBO.setSessionId(baseMsg.getFromUserName());
-                    String response;
-                    try {
-                        response = interactService.chat(chatBO);
-                    } catch (ChatException e) {
-                        response = e.getMessage();
-                    }
-                    return response;
-                }
+        String prompt = baseMsg.getText();
+        if (baseMsg.isGroupMsg()) {
+            if (!prompt.contains("@" + Core.getInstance().getNickName())) {
+                return null;
             }
-        }else {
-            //不是在群聊 则直接回复
-            if (RESET_WORD.equals(baseMsg.getText())){
-                BotUtil.resetPrompt(baseMsg.getFromUserName());
-                return "重置会话成功";
-            }else {
-                chatBO.setPrompt(baseMsg.getText());
-                chatBO.setSessionId(baseMsg.getFromUserName());
-                String response;
-                try {
-                    response = interactService.chat(chatBO);
-                } catch (ChatException e) {
-                    response = e.getMessage();
-                }
-                return response;
+            prompt = prompt.replace("@" + Core.getInstance().getNickName(), "").trim();
+        }
+        if (ChatConstants.RESET_WORD.equals(prompt)) {
+            BotUtil.resetPrompt(baseMsg.getFromUserName());
+            return ChatConstants.RESET_SESSION_MESSAGE_SUCCESS;
+        }
+        log.info("sessionId = {}, prompt = {}, baseMsg = {}", baseMsg.getFromUserName(), prompt, JSON.toJSONString(baseMsg));
+        ChatBO chatBO = new ChatBO(baseMsg.getFromUserName(), prompt);
+        String response;
+        try {
+            response = interactService.chat(chatBO);
+        } catch (ChatException e) {
+            response = e.getMessage();
+            if (response.contains(ChatConstants.MAXIMUM_KEY_WORD)) {
+                BotUtil.resetPrompt(chatBO.getSessionId());
+                return ChatConstants.RESET_SESSION_MESSAGE;
             }
         }
-        return null;
+        return response;
     }
 
     @Override

@@ -57,7 +57,7 @@ public class QqMessageHandler implements ListenerHost {
         try {
             chatBO.setPrompt(prompt);
             response = interactService.chat(chatBO);
-        } catch (ChatException e) {
+        } catch (Exception e) {
             response = e.getMessage();
             if (response.contains(ChatConstants.MAXIMUM_KEY_WORD)) {
                 resetSession(event, chatBO.getSessionId(), ChatConstants.RESET_SESSION_MESSAGE);

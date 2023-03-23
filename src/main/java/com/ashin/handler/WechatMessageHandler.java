@@ -44,7 +44,7 @@ public class WechatMessageHandler implements IMsgHandlerFace {
         String response;
         try {
             response = interactService.chat(chatBO);
-        } catch (ChatException e) {
+        } catch (Exception e) {
             response = e.getMessage();
             if (response.contains(ChatConstants.MAXIMUM_KEY_WORD)) {
                 BotUtil.resetPrompt(chatBO.getSessionId());
